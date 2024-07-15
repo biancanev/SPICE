@@ -49,6 +49,10 @@ class PreviewObject(QGraphicsPixmapItem):
 
     def hoverLeaveEvent(self, event):
         app.instance().restoreOverrideCursor()
+
+    def mousePressEvent(self, event):
+        pass
+    
     def mouseMoveEvent(self, event):
         orig_cursor_position = event.lastScenePos()
         updated_cursor_position = event.scenePos()

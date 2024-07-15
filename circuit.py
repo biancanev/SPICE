@@ -69,7 +69,6 @@ class VoltageSource(TwoPinElement):
     def simulate(self) -> tuple[int, int]:
         self.current = 0
         self.topConnection.voltage = self.bottomConnection.voltage + self.voltage
-        print(self.voltage, self.topConnection.voltage)
         return self.voltage, self.current
     def getName(self) -> str:
         return "V" + str(self.index)
