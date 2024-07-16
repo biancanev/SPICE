@@ -39,7 +39,7 @@ class MovingObject(QGraphicsEllipseItem):
 class PreviewObject(QGraphicsPixmapItem):
     def __init__(self, x, y, fileName):
         self.pm = QPixmap(fileName)
-        self.pm = self.pm.scaled(50, 50, Qt.KeepAspectRatio)
+        self.pm = self.pm.scaled(50, 100, Qt.KeepAspectRatio)
         super().__init__(self.pm)
         self.setPos(x, y)
         self.setAcceptHoverEvents(True)
@@ -90,11 +90,15 @@ class MainView(QMainWindow):
         self.setWindowTitle("SPICE Simulator [ver xx.xx.xx]")
         self.centralwidget = QWidget()
         self.setCentralWidget(self.centralwidget)
-
+        
         pixmapi = getattr(QStyle, "SP_MediaPlay")
         icon = self.style().standardIcon(pixmapi)
         startButton = QAction(QIcon(icon), "Start", self)
+        startButton.setStatusTip("Start Simulation")
         sourceButton = QAction(QIcon("elements\Voltage_Source.svg.png"), "Source", self)
+        sourceButton.setStatusTip("Add Source")
+        resistorButton = QAction(QIcon("elements\Resistor.png"), "Resistor", self)
+        resistorButton.setStatusTip("Add Resistor")
         pixmapi = getattr(QStyle, "SP_FileIcon")
         icon = self.style().standardIcon(pixmapi)
         newfileButton = QAction(QIcon(icon), "&New Schematic", self)
@@ -103,7 +107,9 @@ class MainView(QMainWindow):
         taskbar = QToolBar("main")
         self.addToolBar(taskbar)
         taskbar.addAction(startButton)
+        taskbar.addSeparator()
         taskbar.addAction(sourceButton)
+        taskbar.addAction(resistorButton)
 
         menu = self.menuBar()
 
