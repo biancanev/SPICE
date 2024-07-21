@@ -16,9 +16,9 @@ class CircuitElement:
 class Node:
     def __init__(self, index:int):
         self.index = index
-        self.known = False
+        self.changed = False
         self.elements: list[CircuitElement] = []
-        self.voltage = 0
+        self.voltage = int()
         self.coordinates = list[tuple[int, int]]
 
 class TwoPinElement(CircuitElement):
@@ -40,7 +40,7 @@ class Ground(Node):
     def __init__(self, index:int):
         super().__init__(index)
         self.node = 0
-        self.known = True
+        self.changed = True
 
 
 class Resistor(TwoPinElement):
@@ -71,7 +71,7 @@ class VoltageSource(TwoPinElement):
     def simulate(self) -> tuple[int, int]:
         self.current = 0
         self.topConnection.voltage = self.bottomConnection.voltage + self.voltage
-        self.topConnection.known = True
+        self.topConnection.changed = True
         return self.voltage, self.current
     def getName(self) -> str:
         return "V" + str(self.index)
@@ -100,28 +100,35 @@ class Circuit:
         A = np.zeros((len(self.nodes), len(self.nodes)))
         b = np.zeros((len(self.nodes), 1))
         #use KCL equation for each node and substitute into the matrix
-        for element in self.elements:
-            if type(element) == VoltageSource:
-                element.simulate()
         row = 0
         for node in self.nodes:
-            if node.known:
+            if type(node) == Ground:
                 A[row][node.index] = 1
-                b[row][0] = node.voltage
-            else:
-                usedKnownNodes = []
-                for element in node.elements:
-                    otherNode = element.bottomConnection if element.topConnection == node else element.topConnection
-                    if type(element) == Resistor:
-                        A[row][node.index] += 1 / element.resistance
-                        A[row][otherNode.index] -= 1 / element.resistance if not otherNode.known else 0
-                        if otherNode.known and otherNode not in usedKnownNodes:
-                            b[row][0] += otherNode.voltage / element.resistance
-                            usedKnownNodes.append(otherNode)
+                b[node.index][0] = 0
+                break
+            ignore = False
+            for element in node.elements:
+                other, side = element.bottomConnection.index, 1 if element.topConnection.index == node.index else element.topConnection.index, 0
+                if type(element) == VoltageSource:
+                    element.simulate()
+                    b[row][0] = element.voltage if element.voltage > b[row][0] else b[row][0]
+                    A[row][node.index] = 1
+                    ignore = True
+                elif type(element) == Resistor and not ignore:
+                    print(node, element.topConnection, element.bottomConnection, self.nodes[other])
+                    A[row][node.index] += 1 / element.resistance
+                    b[row][0] += element.topConnection.voltage / element.resistance 
+                elif type(element) == Ground:
+                    b[row][0] = 0
+                    A[row][node.index] = 1
             row += 1
+        print("A:", A)
+        print("b:", b)
         #solve the matrix
         x = np.linalg.solve(A, b)
         #substitute values into corresponding nodes
+        print("x:", x)
+        print(self.nodes)
         for nodeIndex in range(len(A)):
             self.nodes[nodeIndex].voltage = x[nodeIndex][0]
         #solve for unknown element voltages and currents
@@ -132,4 +139,4 @@ class Circuit:
             if type(element) != VoltageSource:
                 res = element.simulate()
                 v, i = res[0], res[1]
-                #print("Element: {0}, V = {1}, I = {2}".format(element.getName(), v, i)) #need to change naming scheme later
+                print("Element: {0}, V = {1}, I = {2}".format(element.getName(), v, i)) #need to change naming scheme later
