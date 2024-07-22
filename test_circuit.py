@@ -105,6 +105,28 @@ class DC_Analysis_Test(unittest.TestCase):
         self.assertAlmostEqual(r4.current, 0.742, 2)
         self.assertAlmostEqual(r5.current, 0.0645, 3)
 
+    def test_node_connection(self):
+        circuit = Circuit()
+        u1 = Node(0)
+        u2 = Node(1)
+        u3 = Node(2)
+        u4 = Node(3)
+        r1 = Resistor(0,0,0,0,0,1)
+        r2 = Resistor(0,0,0,0,1,2)
+        circuit.addNode(u1)
+        circuit.addNode(u2)
+        circuit.addNode(u3)
+        circuit.addNode(u4)
+        circuit.addElement(r1)
+        circuit.addElement(r2)
+        circuit.connectElementtoNode(r1.index, u1.index, 0)
+        circuit.connectElementtoNode(r2.index, u2.index, 0)
+        circuit.connectNodetoNode(u1, u2)
+
+        self.assertEqual(len(u1.elements), 2)
+        self.assertEqual(u1.elements[1], r2)
+        self.assertEqual(len(circuit.nodes), 3)
+
 class DC_Transient_Test(unittest.TestCase):
     def none_right_now(self):
         pass

@@ -94,6 +94,18 @@ class Circuit:
         elif pin == 1:
             self.elements[elementIndex].bottomConnection = self.nodes[nodeIndex]
         self.nodes[nodeIndex].elements.append(self.elements[elementIndex])
+
+    def connectNodetoNode(self, node1, node2):
+        node1.elements = [*node1.elements, *node2.elements] #concat node 2's elements into node 1
+        for element in node2.elements: #set the relevant connections of elements in node 2 to node 1
+            if element.topConnection == node2:
+                element.topConnection = node1
+            else:
+                element.bottomConnection = node1
+        for node in self.nodes[node2.index::1]: #reindex all nodes above the node
+            node.index -= 1
+        self.nodes.remove(node2) #delete node 2
+        del node2
     
     def simulate(self):
         #find all known nodes
