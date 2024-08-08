@@ -26,7 +26,7 @@ class TwoPinElement(CircuitElement):
         super().__init__(x, y, w, h, file_name, index)
         self.topConnection = Node("")
         self.bottomConnection = Node("")
-    
+
     def connectToNode(self, pin:int, node:Node):
         if pin == 0:
             self.topConnection = node
@@ -52,10 +52,10 @@ class Resistor(TwoPinElement):
         self.voltage = abs(self.topConnection.voltage) - abs(self.bottomConnection.voltage)
         self.current = self.voltage / self.resistance
         return (self.voltage, self.current)
-    
+
     def getName(self) -> str:
         return "R" + str(self.index)
-    
+
 class VoltageSource(TwoPinElement):
     def __init__(self, x:int, y:int, w:int, h:int, wf:int, index:int, v:int):
         match wf:
@@ -106,7 +106,7 @@ class Circuit:
             node.index -= 1
         self.nodes.remove(node2) #delete node 2
         del node2
-    
+
     def simulate(self):
         #find all known nodes
         A = np.zeros((len(self.nodes), len(self.nodes)))
